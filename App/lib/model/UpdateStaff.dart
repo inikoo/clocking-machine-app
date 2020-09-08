@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 
 class UpdateStaff extends StatelessWidget {
   final bool nfc;
+  final String deviceName;
 
-  UpdateStaff({@required this.nfc});
+  UpdateStaff({@required this.nfc, @required this.deviceName});
 
   void _onPressedStaffRow(Staff staff, BuildContext context) {
     print(staff.id);
@@ -18,6 +19,7 @@ class UpdateStaff extends StatelessWidget {
         pageBuilder: (_, __, ___) => StaffAuthInitPage(
           nfc: nfc,
           staff: staff,
+          deviceName: deviceName,
         ),
       ),
     );

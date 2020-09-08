@@ -1,13 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:ClockIN/const.dart';
 import 'package:ClockIN/data/user/user.dart';
 import 'package:ClockIN/data/user/user_dao.dart';
-// import 'package:ClockIN/graphql/g_actions.dart';
+import 'package:ClockIN/util/system_message.dart';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:http/http.dart' as http;
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -17,7 +14,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   User _user;
   UserDao _userDao = UserDao();
-  // GActions _actions = GActions();
 
   @override
   Stream<AuthState> mapEventToState(
@@ -36,20 +32,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       yield LoadingAuthState();
 
-      // User user = await _userDao.getUser();
+      User user = await _userDao.getUser();
 
-      // if (user != null && user.username != null || user.username != "") {
-      //   final _checkUser = await _actions.checkUser(user);
-
-      //   if (_checkUser) {
-      //     _user = user;
-      //     yield HomePageAuthState(user);
-      //   } else {
-      //     yield LoginPageAuthState();
-      //   }
-      // } else {
-      yield LoginPageAuthState();
-      // }
+      if (user != null && user.deviceName != null || user.deviceName != "") {
+        yield HomePageAuthState(user);
+      } else {
+        yield LoginPageAuthState();
+      }
     } catch (_) {
       yield (LoginPageAuthState());
     }
@@ -57,52 +46,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Stream<AuthState> _mapLoginAuthEvent(LoginAuthEvent event) async* {
     try {
-      final _data = {
-        "handle": event.username,
-        "password": event.password,
-        "device_name": event.deviceName,
-        "role": "clocking-machine",
-      };
-
-      final _headers = {
-        "Accept": "application/json",
-      };
-
-      var _response = await http.post(
-        Const.authURL,
-        headers: _headers,
-        body: _data,
-      );
-
-      if (_response.statusCode == 200) {
-        var _resData = json.decode(_response.body);
-
-        _user = User(
-          id: int.parse(_resData[0]["clockingMachine"]["id"].toString()),
-          username: event.username,
-          deviceName: event.deviceName,
-          token: _resData[0]["token"].toString(),
-        );
-
-        yield HomePageAuthState(_user);
-        await _initUserData(_user);
-      } else if (_response.statusCode == 422) {
-        var _resData = json.decode(_response.body);
-
-        if (_resData["errors"]["email"] != null) {
-          yield LoginPageAuthState(error: "Incorrect Username or Password!");
-        } else if (_resData["errors"]["device_name"] != null) {
-          yield LoginPageAuthState(error: "Duplicated device name!");
-        } else {
-          yield LoginPageAuthState(error: "Something went wrong!");
-        }
+      if (event.deviceName != null && event.deviceName.trim() != "") {
+        User user = User(deviceName: event.deviceName);
+        _initUserData(user);
+        yield HomePageAuthState(user);
+      } else {
+        yield LoginPageAuthState(error: SystemMessage.errSystemError);
       }
     } catch (_) {
-      yield LoginPageAuthState(error: "Something went wrong!");
+      yield LoginPageAuthState(error: SystemMessage.errSystemError);
     }
   }
 
   Stream<AuthState> _mapLogoutAuthEvent() async* {
+    await _userDao.delete();
     yield LoginPageAuthState();
   }
 

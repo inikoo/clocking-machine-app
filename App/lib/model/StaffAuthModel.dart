@@ -6,7 +6,9 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 mixin StaffAuthModel {
   BuildContext authContext;
   final pincodeFromKey = GlobalKey<FormState>();
+  final settingPinFromKey = GlobalKey<FormState>();
   TextEditingController txtPinCode = TextEditingController();
+  TextEditingController txtSettingPin = TextEditingController();
 
   void onPressedCancel() {
     Navigator.pop(authContext);
@@ -15,6 +17,14 @@ mixin StaffAuthModel {
   String _validatePinCode(String value) {
     if (value == null || value.trim() == "" || value.length != 4) {
       return "PIN CODE must be 4 digits";
+    }
+
+    return null;
+  }
+
+  String _validateSettingPin(String value){
+    if (value == null || value.trim() == "" || value.length != 6) {
+      return "PIN must be 6 digits";
     }
 
     return null;
@@ -296,6 +306,10 @@ mixin StaffAuthModel {
                 controller: txtPinCode,
                 decoration: InputDecoration(
                   fillColor: Colors.white,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                    borderSide: BorderSide(color: Colors.grey, width: 1),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15.0),
                     borderSide: BorderSide(color: Colors.black, width: 4),
@@ -304,7 +318,7 @@ mixin StaffAuthModel {
                   hintText: "PIN CODE HERE",
                   hintStyle: TextStyle(
                     letterSpacing: 2,
-                    color: Colors.black,
+                    color: Colors.grey,
                   ),
                 ),
                 validator: _validatePinCode,
@@ -327,6 +341,85 @@ mixin StaffAuthModel {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 85),
               child: customizedButton("SEND", onPressedSendPinCode),
+            ),
+            SizedBox(height: 40),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Padding(
+                padding: EdgeInsets.only(right: 25),
+                child: RaisedButton(
+                  child: Text(
+                    "Go back",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black.withOpacity(0.6),
+                    ),
+                  ),
+                  onPressed: onPressedCancel,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    side: BorderSide(
+                        color: Colors.black.withOpacity(0.6), width: 1.5),
+                  ),
+                  color: Colors.white,
+                  splashColor: Colors.black.withOpacity(0.6),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget showSettingPinEntryWidget(Function onPressedAuth) {
+    return Form(
+      key: settingPinFromKey,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 60),
+              child: TextFormField(
+                controller: txtSettingPin,
+                decoration: InputDecoration(
+                  fillColor: Colors.white,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                    borderSide: BorderSide(color: Colors.grey, width: 1),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                    borderSide: BorderSide(color: Colors.black, width: 4),
+                  ),
+                  counterText: "",
+                  hintText: "ADMIN PIN HERE",
+                  hintStyle: TextStyle(
+                    letterSpacing: 2,
+                    color: Colors.grey,
+                  ),
+                ),
+                validator: _validateSettingPin,
+                keyboardType: TextInputType.number,
+                style: TextStyle(
+                  letterSpacing: 40,
+                  fontSize: 20,
+                  color: Colors.black,
+                ),
+                textAlign: TextAlign.center,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly
+                ],
+                maxLength: 6,
+                maxLines: 1,
+                maxLengthEnforced: true,
+              ),
+            ),
+            SizedBox(height: 10),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 85),
+              child: customizedButton("Authenticate", onPressedAuth),
             ),
             SizedBox(height: 40),
             Align(

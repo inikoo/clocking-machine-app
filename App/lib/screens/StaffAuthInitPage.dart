@@ -8,17 +8,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class StaffAuthInitPage extends StatelessWidget {
   final bool nfc;
   final Staff staff;
+  final String deviceName;
 
   StaffAuthInitPage({
     this.nfc = true,
     @required this.staff,
+    @required this.deviceName,
   });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => StaffAuthInitBloc()
-        ..add(nfc ? InitialNfcEvent(staff) : InitialPinCodeEvent(staff)),
+        ..add(nfc
+            ? InitialNfcEvent(staff: staff, deviceName: deviceName)
+            : InitialPinCodeEvent(staff: staff, deviceName: deviceName)),
       child: _StaffAuthInitPageWidget(),
     );
   }

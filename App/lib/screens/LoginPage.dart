@@ -16,32 +16,32 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   // bool _checkServerAddress = true;
-  bool _checkUsername = true;
-  bool _checkPassword = true;
+  // bool _checkUsername = true;
+  // bool _checkPassword = true;
   bool _checkDeviceName = true;
 
   // final TextEditingController _serverAddressController =
   //     TextEditingController();
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  // final TextEditingController _usernameController = TextEditingController();
+  // final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _deviceNameController = TextEditingController();
 
   void _onPressedLogin(BuildContext context) {
     setState(() {
       // _checkServerAddress = (_serverAddressController.text != null &&
       //     _serverAddressController.text != "");
-      _checkUsername =
-          (_usernameController.text != null && _usernameController.text != "");
-      _checkPassword =
-          (_passwordController.text != null && _passwordController.text != "");
+      // _checkUsername =
+      //     (_usernameController.text != null && _usernameController.text != "");
+      // _checkPassword =
+      //     (_passwordController.text != null && _passwordController.text != "");
       _checkDeviceName = (_deviceNameController.text != null &&
           _deviceNameController.text != "");
     });
 
-    if (_checkUsername && _checkPassword) {
+    if (_checkDeviceName) {
       BlocProvider.of<AuthBloc>(context).add(LoginAuthEvent(
-        username: _usernameController.text,
-        password: _passwordController.text,
+        // username: _usernameController.text,
+        // password: _passwordController.text,
         deviceName: _deviceNameController.text,
       ));
     }
@@ -173,22 +173,22 @@ class _LoginPageState extends State<LoginPage> {
                           //   textEditingController: _serverAddressController,
                           //   state: _checkServerAddress,
                           // ),
-                          SizedBox(height: 15),
-                          _customizedTextFiled(
-                            hintText: "User Name",
-                            prefixIcon: FontAwesome.user,
-                            textEditingController: _usernameController,
-                            state: _checkUsername,
-                          ),
-                          SizedBox(height: 15),
-                          _customizedTextFiled(
-                            hintText: "Password",
-                            prefixIcon: FontAwesome.lock,
-                            textEditingController: _passwordController,
-                            state: _checkPassword,
-                            password: true,
-                          ),
-                          SizedBox(height: 15),
+                          // SizedBox(height: 15),
+                          // _customizedTextFiled(
+                          //   hintText: "User Name",
+                          //   prefixIcon: FontAwesome.user,
+                          //   textEditingController: _usernameController,
+                          //   state: _checkUsername,
+                          // ),
+                          // SizedBox(height: 15),
+                          // _customizedTextFiled(
+                          //   hintText: "Password",
+                          //   prefixIcon: FontAwesome.lock,
+                          //   textEditingController: _passwordController,
+                          //   state: _checkPassword,
+                          //   password: true,
+                          // ),
+                          // SizedBox(height: 15),
                           _customizedTextFiled(
                             hintText: "Device Name",
                             prefixIcon: AntDesign.mobile1,

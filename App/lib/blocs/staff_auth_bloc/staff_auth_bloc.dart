@@ -3,6 +3,8 @@ import 'dart:convert';
 // import 'dart:io';
 
 import 'package:ClockIN/const.dart';
+import 'package:ClockIN/util/device_checker.dart';
+import 'package:ClockIN/util/system_message.dart';
 // import 'package:ClockIN/graphql/g_actions.dart';
 import 'package:bloc/bloc.dart';
 // import 'package:camera/camera.dart';
@@ -28,17 +30,18 @@ class StaffAuthBloc extends Bloc<StaffAuthEvent, StaffAuthState> {
   // CameraController _cameraController;
   // GActions _actions = GActions();
   bool _nfc;
+  String _deviceName;
 
   @override
   Stream<StaffAuthState> mapEventToState(
     StaffAuthEvent event,
   ) async* {
     if (event is ReadNfcEvent) {
-      yield* _mapReadNfcEvent();
+      yield* _mapReadNfcEvent(event);
     } else if (event is ManualAuthEvent) {
-      yield ShowManualAuthState();
+      yield* _mapInitManualAuthEventEvent(event);
     } else if (event is SetManualAuthEvent) {
-      yield* _mapSetManualAuthEventEvent(event);
+      yield* _mapSetManualAuthEvent(event);
     } else if (event is InActionEvent) {
       yield* _mapInOutActionEvent(true);
     } else if (event is OutActionEvent) {
@@ -46,41 +49,68 @@ class StaffAuthBloc extends Bloc<StaffAuthEvent, StaffAuthState> {
     }
   }
 
-  Stream<StaffAuthState> _mapReadNfcEvent() async* {
+  Stream<StaffAuthState> _mapReadNfcEvent(ReadNfcEvent event) async* {
     try {
-      yield ScanningNfcState();
-      _nfc = true;
+      yield LoadingState();
 
-      // _imagePath = "";
+      _deviceName = event.deviceName;
+      final _check = await DeviceChecker.test(deviceName: event.deviceName);
 
-      final nfcData = await FlutterNfcReader.read();
+      if (!_check.error) {
+        yield ScanningNfcState();
+        _nfc = true;
 
-      if (nfcData != null) {
-        // String _image = await _captureImage();
-        // _imagePath = _image;
+        // _imagePath = "";
 
-        // if (_image == null || _image == "") {
-        //   yield ErrorState("Oops.. Something went wrong!");
-        //   return;
-        // }
+        final nfcData = await FlutterNfcReader.read();
 
-        // _staff = await _actions.getStaffId(rfid: nfcData.id);
-        _staff = await _checkStaff(nfc: nfcData.id);
+        if (nfcData != null) {
+          // String _image = await _captureImage();
+          // _imagePath = _image;
 
-        if (_staff != null) {
-          yield SelectActionState(_staff);
+          // if (_image == null || _image == "") {
+          //   yield ErrorState("Oops.. Something went wrong!");
+          //   return;
+          // }
+
+          // _staff = await _actions.getStaffId(rfid: nfcData.id);
+          _staff = await _checkStaff(nfc: nfcData.id);
+
+          if (_staff != null) {
+            yield SelectActionState(_staff);
+          } else {
+            yield ErrorState(SystemMessage.errNfcNotValid(nfcData.id));
+          }
         } else {
-          yield ErrorState("NFC tag is not identified!\n\nID: ${nfcData.id}");
+          yield ErrorState(SystemMessage.errNfcNullError);
         }
       } else {
-        yield ErrorState("No NFC tags identified!");
+        yield ErrorState(_check.message);
       }
     } catch (_) {
-      yield ErrorState("Oops.. Something went wrong!");
+      yield ErrorState(SystemMessage.errSystemError);
     }
   }
 
-  Stream<StaffAuthState> _mapSetManualAuthEventEvent(
+  Stream<StaffAuthState> _mapInitManualAuthEventEvent(
+      ManualAuthEvent event) async* {
+    try {
+      yield LoadingState();
+
+      _deviceName = event.deviceName;
+      final _check = await DeviceChecker.test(deviceName: event.deviceName);
+
+      if (!_check.error) {
+        yield ShowManualAuthState();
+      } else {
+        yield ErrorState(_check.message);
+      }
+    } catch (_) {
+      yield ErrorState(SystemMessage.errSystemError);
+    }
+  }
+
+  Stream<StaffAuthState> _mapSetManualAuthEvent(
       SetManualAuthEvent event) async* {
     try {
       yield LoadingState();
@@ -93,11 +123,10 @@ class StaffAuthBloc extends Bloc<StaffAuthEvent, StaffAuthState> {
       if (_staff != null) {
         yield SelectActionState(_staff);
       } else {
-        yield ErrorState(
-            "Entered PIN CODE is not valid!\n\nPIN CODE : ${event.pinCode}");
+        yield ErrorState(SystemMessage.errPinCodeNotValid(event.pinCode));
       }
     } catch (_) {
-      yield ErrorState("Oops.. Something went wrong!");
+      yield ErrorState(SystemMessage.errSystemError);
     }
   }
 
@@ -112,7 +141,7 @@ class StaffAuthBloc extends Bloc<StaffAuthEvent, StaffAuthState> {
         "staff_id": _staff.id,
         "clocking": DateTime.now().toString().split(".")[0],
       };
-      final _headers = {"x-api-key": "demo12${Const.apiKey}"};
+      final _headers = {"x-api-key": "$_deviceName${Const.apiKey}"};
 
       Response response = await Dio().post(
         Const.serverURL,
@@ -121,9 +150,9 @@ class StaffAuthBloc extends Bloc<StaffAuthEvent, StaffAuthState> {
       );
 
       if (response.statusCode == 200) {
-        yield SuccessState("You have registered as ${action.toUpperCase()}");
+        yield SuccessState(SystemMessage.sucClockedSuccess(action));
       } else {
-        yield ErrorState("Oops.. Something went wrong!");
+        yield ErrorState(SystemMessage.errSystemError);
       }
 
       // if (fileAvailable) {
@@ -157,7 +186,7 @@ class StaffAuthBloc extends Bloc<StaffAuthEvent, StaffAuthState> {
       //   yield ErrorState("Oops.. Something went wrong!");
       // }
     } catch (_) {
-      yield ErrorState("Oops.. Something went wrong!");
+      yield ErrorState(SystemMessage.errSystemError);
     }
   }
 
@@ -186,7 +215,7 @@ class StaffAuthBloc extends Bloc<StaffAuthEvent, StaffAuthState> {
   Future<Staff> _checkStaff({String nfc, String pinCode}) async {
     try {
       final _data = {"get": "staff"};
-      final _headers = {"x-api-key": "demo12${Const.apiKey}"};
+      final _headers = {"x-api-key": "$_deviceName${Const.apiKey}"};
 
       Response _response = await Dio().post(
         Const.serverURL,

@@ -6,14 +6,20 @@ import 'package:ClockIN/Animation/FadeAnimation.dart';
 
 class StaffAuthPage extends StatelessWidget {
   final bool manual;
+  final String deviceName;
 
-  StaffAuthPage({this.manual = false});
+  StaffAuthPage({
+    this.manual = false,
+    @required this.deviceName,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) =>
-          StaffAuthBloc()..add(manual ? ManualAuthEvent() : ReadNfcEvent()),
+      create: (context) => StaffAuthBloc()
+        ..add(manual
+            ? ManualAuthEvent(deviceName: deviceName)
+            : ReadNfcEvent(deviceName: deviceName)),
       child: _StaffAuthPageWidget(),
     );
   }
