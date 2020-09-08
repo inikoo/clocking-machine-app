@@ -1,10 +1,17 @@
 import 'package:ClockIN/Animation/FadeAnimation.dart';
+import 'package:ClockIN/blocs/auth_bloc/auth_bloc.dart';
+import 'package:ClockIN/data/user/user.dart';
 import 'package:ClockIN/model/HomeBackground.dart';
+import 'package:ClockIN/screens/SettingAuthPage.dart';
 import 'package:ClockIN/screens/SettingsPage.dart';
 import 'package:ClockIN/screens/StaffAuthPage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomePage extends StatefulWidget {
+  final User user;
+
+  HomePage({this.user});
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -15,7 +22,9 @@ class _HomePageState extends State<HomePage> {
       context,
       PageRouteBuilder(
         opaque: false,
-        pageBuilder: (_, __, ___) => StaffAuthPage(),
+        pageBuilder: (_, __, ___) => StaffAuthPage(
+          deviceName: widget.user.deviceName,
+        ),
       ),
     );
   }
@@ -25,17 +34,58 @@ class _HomePageState extends State<HomePage> {
       context,
       PageRouteBuilder(
         opaque: false,
-        pageBuilder: (_, __, ___) => StaffAuthPage(manual: true),
+        pageBuilder: (_, __, ___) => StaffAuthPage(
+          manual: true,
+          deviceName: widget.user.deviceName,
+        ),
       ),
     );
   }
 
-  void _onPressedSettings() {
-    Navigator.push(
+  Future<void> _onPressedSettings() async {
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => SettingsPage(),
+        builder: (context) => SettingAuthPage(
+          deviceName: widget.user.deviceName,
+        ),
       ),
+    );
+
+    if (result != null && result == true) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SettingsPage(deviceName: widget.user.deviceName),
+        ),
+      );
+    }
+  }
+
+  void _onPressedLogout() {
+    _onPressedYes() {
+      BlocProvider.of<AuthBloc>(context)..add(LogoutAuthEvent());
+      Navigator.pop(context);
+    }
+
+    _onPressedNo() {
+      Navigator.pop(context);
+    }
+
+    AlertDialog alert = AlertDialog(
+      title: Text("Logout"),
+      content: Text("Are you sure want to logout?"),
+      actions: [
+        FlatButton(child: Text("Yes"), onPressed: _onPressedYes),
+        FlatButton(child: Text("No"), onPressed: _onPressedNo),
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
     );
   }
 
@@ -122,6 +172,22 @@ class _HomePageState extends State<HomePage> {
                       size: 30,
                     ),
                     onPressed: _onPressedSettings,
+                  ),
+                ),
+              ),
+            ),
+            SafeArea(
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: EdgeInsets.all(15),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.exit_to_app,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                    onPressed: _onPressedLogout,
                   ),
                 ),
               ),

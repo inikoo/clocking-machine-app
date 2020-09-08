@@ -21,17 +21,17 @@ class StaffBloc extends Bloc<StaffEvent, StaffState> {
     StaffEvent event,
   ) async* {
     if (event is LoadStaffEvent) {
-      yield* _mapLoadStaffEvent();
+      yield* _mapLoadStaffEvent(event);
     }
   }
 
-  Stream<StaffState> _mapLoadStaffEvent() async* {
+  Stream<StaffState> _mapLoadStaffEvent(LoadStaffEvent event) async* {
     try {
       yield StaffLoading();
 
       final _data = {"get": "staff"};
 
-      final _headers = {"x-api-key": "demo12${Const.apiKey}"};
+      final _headers = {"x-api-key": "${event.deviceName}${Const.apiKey}"};
 
       Response _response = await Dio().post(
         Const.serverURL,

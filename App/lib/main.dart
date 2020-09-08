@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         if (state is HomePageAuthState) {
-          return HomePage();
+          return HomePage(user: state.user);
         } else if (state is LoginPageAuthState) {
           return LoginPage(errorText: state.error);
         }

@@ -5,14 +5,22 @@ abstract class StaffAuthInitEvent {}
 
 class InitialNfcEvent extends StaffAuthInitEvent {
   final Staff staff;
+  final String deviceName;
 
-  InitialNfcEvent(this.staff);
+  InitialNfcEvent({
+    this.staff,
+    this.deviceName,
+  });
 }
 
 class InitialPinCodeEvent extends StaffAuthInitEvent {
   final Staff staff;
+  final String deviceName;
 
-  InitialPinCodeEvent(this.staff);
+  InitialPinCodeEvent({
+    this.staff,
+    this.deviceName,
+  });
 }
 
 class SetPinCodeEvent extends StaffAuthInitEvent {

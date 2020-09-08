@@ -5,7 +5,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vertical_tabs/vertical_tabs.dart';
 
 class SettingsPage extends StatelessWidget {
-  Widget tabsContent(String caption, [String description = '']) {
+  final deviceName;
+
+  SettingsPage({this.deviceName});
+
+  Widget tabsContent(String caption, {String description = ''}) {
     return Container(
       margin: EdgeInsets.all(10),
       padding: EdgeInsets.all(20),
@@ -44,7 +48,8 @@ class SettingsPage extends StatelessWidget {
       body: Column(
         children: [
           BlocProvider(
-            create: (context) => StaffBloc()..add(LoadStaffEvent()),
+            create: (context) =>
+                StaffBloc()..add(LoadStaffEvent(deviceName: deviceName)),
             child: Expanded(
               child: VerticalTabs(
                 indicatorColor: Colors.blue,
@@ -75,8 +80,8 @@ class SettingsPage extends StatelessWidget {
                   ),
                 ],
                 contents: <Widget>[
-                  UpdateStaff(nfc: true),
-                  UpdateStaff(nfc: false),
+                  UpdateStaff(deviceName: deviceName, nfc: true),
+                  UpdateStaff(deviceName: deviceName, nfc: false),
                 ],
               ),
             ),

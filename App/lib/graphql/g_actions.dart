@@ -1,4 +1,4 @@
-import 'package:ClockIN/const.dart';
+// import 'package:ClockIN/const.dart';
 import 'package:ClockIN/data/staff/staff.dart';
 import 'package:ClockIN/data/staff/staff_in_out.dart';
 import 'package:ClockIN/data/user/user.dart';
@@ -9,9 +9,9 @@ class GActions {
   GraphQLClient _graphQLClient;
 
   GActions() {
-    final httpLink = HttpLink(uri: Const.graphqlURL);
-    final _link = Link.from([httpLink]);
-    _graphQLClient = GraphQLClient(cache: InMemoryCache(), link: _link);
+    // final httpLink = HttpLink(uri: Const.graphqlURL);
+    // final _link = Link.from([httpLink]);
+    // _graphQLClient = GraphQLClient(cache: InMemoryCache(), link: _link);
   }
 
   Future<Staff> getStaffId({

@@ -18,6 +18,7 @@ class StaffAuthInitBloc extends Bloc<StaffAuthInitEvent, StaffAuthInitState> {
   bool _nfc;
   Staff _staff;
   String _data;
+  String _deviceName;
 
   @override
   Stream<StaffAuthInitState> mapEventToState(
@@ -36,6 +37,7 @@ class StaffAuthInitBloc extends Bloc<StaffAuthInitEvent, StaffAuthInitState> {
 
   Stream<StaffAuthInitState> _mapInitialNfcEvent(InitialNfcEvent event) async* {
     try {
+      _deviceName = event.deviceName;
       if (event.staff != null) {
         _staff = event.staff;
         _nfc = true;
@@ -67,6 +69,7 @@ class StaffAuthInitBloc extends Bloc<StaffAuthInitEvent, StaffAuthInitState> {
   Stream<StaffAuthInitState> _mapInitialPinCodeEvent(
       InitialPinCodeEvent event) async* {
     try {
+      _deviceName = event.deviceName;
       if (event.staff != null) {
         _staff = event.staff;
         yield ShowPinCodeEntryState();
@@ -108,7 +111,7 @@ class StaffAuthInitBloc extends Bloc<StaffAuthInitEvent, StaffAuthInitState> {
         data["pin"] = _data;
       }
 
-      final _headers = {"x-api-key": "demo12${Const.apiKey}"};
+      final _headers = {"x-api-key": "$_deviceName${Const.apiKey}"};
 
       Response _response = await Dio().post(
         Const.serverURL,
