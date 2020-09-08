@@ -10,6 +10,8 @@ The plan is use GraphQL to comunicate with the LB
 # How to intall test app in your device
 
 ## Andrioid
+https://enappd.com/blog/setup-flutter-in-windows-and-mac/36/
+
 
 ## iOS
 
